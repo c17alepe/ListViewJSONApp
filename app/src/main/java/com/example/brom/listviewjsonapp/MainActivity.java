@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_refresh) {
             mountainData.clear();
             new FetchData().execute();
+            Toast.makeText(getApplicationContext(), "The list has been updated.", Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -149,12 +150,12 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < jsonMountains.length(); i++) {
                     JSONObject jsonChild = jsonMountains.getJSONObject(i);
 
-                    String name = jsonChild.getString("name");
-                    String location = jsonChild.getString("location");
-                    int height = jsonChild.getInt("size");
+                    String jsonName = jsonChild.getString("name");
+                    String jsonLocation = jsonChild.getString("location");
+                    int jsonHeight = jsonChild.getInt("size");
 
-                    Mountain mountData = new Mountain(name, location, height);
-                    mountainData.add(mountData);
+
+                    mountainData.add(new Mountain(jsonName, jsonLocation, jsonHeight));
                 }
             } catch(Exception e){
                 Log.d("alpe", "exception:" + e.getMessage());
