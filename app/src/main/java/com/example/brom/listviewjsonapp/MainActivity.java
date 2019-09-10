@@ -12,6 +12,18 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.util.ArrayList;
+
 
 // Create a new class, Mountain, that can hold your JSON data
 
@@ -27,12 +39,43 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+        if (id == R.id.action_refresh) {
+            mountainData.clear();
+            new FetchData().execute();
+            return true;
+        }
+
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        new FetchData().execute();
     }
 
+    ArrayList<Mountain> mountainData=new ArrayList<>();
+
     private class FetchData extends AsyncTask<Void,Void,String>{
+
+        //@Override
+        //protected void onPostExecute(String s){
+        //    super.onPostExecute(s);
+        //    Log.d("alpe","DataFetched"+s);
+        //}
+
         @Override
         protected String doInBackground(Void... params) {
             // These two variables need to be declared outside the try/catch
@@ -45,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 // Construct the URL for the Internet service
-                URL url = new URL("_ENTER_THE_URL_TO_THE_PHP_SERVICE_SERVING_JSON_HERE_");
+                URL url = new URL("https://wwwlab.iit.his.se/brom/kurser/mobilprog/dbservice/admin/getdataasjson.php?type=brom");
 
                 // Create the request to the PHP-service, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -96,12 +139,46 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String o) {
             super.onPostExecute(o);
-            // This code executes after we have received our data. The String object o holds
-            // the un-parsed JSON string or is null if we had an IOException during the fetch.
 
-            // Implement a parsing code that loops through the entire JSON and creates objects
-            // of our newly created Mountain class.
+            String JSONdata = o;
+
+            Log.d("alpe",o);
+
+            try {
+                JSONArray jsonMountains = new JSONArray(JSONdata);
+                for (int i = 0; i < jsonMountains.length(); i++) {
+                    JSONObject jsonChild = jsonMountains.getJSONObject(i);
+
+                    String name = jsonChild.getString("name");
+                    String location = jsonChild.getString("location");
+                    int height = jsonChild.getInt("size");
+
+                    Mountain mountData = new Mountain(name, location, height);
+                    mountainData.add(mountData);
+                }
+            } catch(Exception e){
+                Log.d("alpe", "exception:" + e.getMessage());
+            }
+
+            ArrayList<String> listMountain = new ArrayList();
+            for (int i=0; i<mountainData.size();i++){
+                listMountain.add(mountainData.get(i).getName());
+            }
+
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, R.layout.list_item_textview, R.id.list_item_textview, listMountain);
+            ListView listview= findViewById(R.id.main_listview);
+            listview.setAdapter(adapter);
+
+            listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(getApplicationContext(), mountainData.get(position).info(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
         }
     }
+
 }
 
