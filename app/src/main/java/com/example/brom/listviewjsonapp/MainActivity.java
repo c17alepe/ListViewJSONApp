@@ -38,12 +38,12 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    //adds the refresh button
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
+    //sets the view and executes parsing
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d("alpe",o);
 
+            //extracts name, location and height
             try {
                 JSONArray jsonMountains = new JSONArray(JSONdata);
                 for (int i = 0; i < jsonMountains.length(); i++) {
@@ -161,16 +162,18 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("alpe", "exception:" + e.getMessage());
             }
 
+            //creates the arraylist for names
             ArrayList<String> listMountain = new ArrayList();
             for (int i=0; i<mountainData.size();i++){
                 listMountain.add(mountainData.get(i).getName());
             }
 
-
+            //adapter for the listview
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this, R.layout.list_item_textview, R.id.list_item_textview, listMountain);
             ListView listview= findViewById(R.id.main_listview);
             listview.setAdapter(adapter);
 
+            //listens for clicks and returns the appropriate information
             listview.setOnItemClickListener(new AdapterView.OnItemClickListener(){
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Toast.makeText(getApplicationContext(), mountainData.get(position).info(), Toast.LENGTH_SHORT).show();
